@@ -16,7 +16,7 @@ class Comment extends Model {
     $stmt->closeCursor();
   }
 
-  public function findAllByPartner($partner_id) {
+  public function findAllCommentsByPartnerId($partner_id) {
     $req = "SELECT gbaf_comment.content, 
             DATE_FORMAT(gbaf_comment.createdAt, '%d/%m/%Y at %Hh:%mm:%ss') as dateFr, 
             gbaf_user.firstName 
@@ -31,5 +31,4 @@ class Comment extends Model {
     $stmt->closeCursor();
     return $comments;
   }
-  
 }

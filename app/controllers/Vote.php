@@ -19,9 +19,7 @@ class Vote extends Controller {
   }
 
   public function thumbup() {
-
     if(isset($_POST['thumb-up'])) {
-
       $userId = $_POST['userId'];
       $partnerId = $_POST['partnerId'];
       $like = $_POST['like-count'];
@@ -31,24 +29,22 @@ class Vote extends Controller {
 
       if($voteByUserAndPartnerId === false) {
         $this->model->saveVote($userId, $partnerId, $like, 'like_count');
-        \Location::redirect("index.php?controller=partner&task=getOnePartner&partnerId=" . $partnerId);
+
+        \Location::redirect(URL . "partner/getOnePartner/partnerId/" . $partnerId);
       } elseif($voteByUserAndPartnerId['dislike_count'] !== null) {
         $this->model->updateVoteByUserAndPartnerId($userId, $partnerId, $like, null);
-        \Location::redirect("index.php?controller=partner&task=getOnePartner&partnerId=" . $partnerId);
+
+        \Location::redirect(URL . "partner/getOnePartner/partnerId/" . $partnerId);
       } elseif(count($voteByUserAndPartnerId) > 1) {
         $this->model->deleteVoteByUserAndPartnerId($userId, $partnerId);
-        \Location::redirect("index.php?controller=partner&task=getOnePartner&partnerId=" . $partnerId);
+        
+        \Location::redirect(URL . "partner/getOnePartner/partnerId/" . $partnerId);
       }
-      
     } 
-
-    
   }
 
   public function thumbDown() {
-
     if(isset($_POST['thumb-down'])) {
-    
       $userId = $_POST['userId'];
       $partnerId = $_POST['partnerId'];
       $dislike = $_POST['dislike-count'];
@@ -58,16 +54,17 @@ class Vote extends Controller {
 
       if($voteByUserAndPartnerId === false) {
         $this->model->saveVote($userId, $partnerId, $dislike, 'dislike_count');
-        \Location::redirect("index.php?controller=partner&task=getOnePartner&partnerId=" . $partnerId);
+
+        \Location::redirect(URL . "partner/getOnePartner/partnerId/" . $partnerId);
       } elseif($voteByUserAndPartnerId['like_count'] !== null) {
         $this->model->updateVoteByUserAndPartnerId($userId, $partnerId, null, $dislike);
-        \Location::redirect("index.php?controller=partner&task=getOnePartner&partnerId=" . $partnerId);
+
+        \Location::redirect(URL . "partner/getOnePartner/partnerId/" . $partnerId);
       } else {
         $this->model->deleteVoteByUserAndPartnerId($userId, $partnerId);
-        \Location::redirect("index.php?controller=partner&task=getOnePartner&partnerId=" . $partnerId);
+
+        \Location::redirect(URL . "partner/getOnePartner/partnerId/" . $partnerId);
       }
-      
     }
   }
-
 }

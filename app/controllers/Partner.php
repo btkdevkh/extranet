@@ -11,31 +11,42 @@ class Partner extends Controller {
 
     $partners = $this->model->findAll();
     $title = "Profile";
-    \Vue::render("user/profile", compact("title", "partners"));
+    \Vue::render("user/profile", compact(
+        "title", 
+        "partners"
+      )
+    );
   }
 
-  public function getOnePartner() {
+  public function getOnePartner($id) {
     \Auth::authentification();
 
-    if(isset($_GET['partnerId']) && (int)$_GET['partnerId']) { 
+    $title = "Partner";
+    $userId = $_SESSION['userId'] ?? null;
+    $partnerId = $id ?? null; 
 
-      $partner = $this->model->findById($_GET['partnerId']);
-
-      $commentManager = new \Models\Comment();
-      $comments = $commentManager->findAllByPartner($_GET['partnerId']);
+    if($partnerId) { 
+      $partner = $this->model->findById($partnerId);
 
       $voteManager = new \Models\Vote();
-      $likes = $voteManager->findVotesByPartner($_GET['partnerId'], "like_count");
-      $dislikes = $voteManager->findVotesByPartner($_GET['partnerId'], "dislike_count");
+      $likes = $voteManager->findVotesByPartner($partnerId, "like_count");
+      $dislikes = $voteManager->findVotesByPartner($partnerId, "dislike_count");
 
-      $title = "Partner";
-      $partnerId = $_GET['partnerId']; 
-
+      $commentManager = new \Models\Comment();
+      $comments = $commentManager->findAllCommentsByPartnerId($partnerId);
     } else {
-      \Location::redirect("index.php?controller=partner&task=getAllPartners");
+      \Location::redirect(URL . "partner/getAllPartners");
     }
 
-    \Vue::render("partner/partner", compact("title", "partner", "comments", "likes", "dislikes", "partnerId")); 
+    \Vue::render("partner/partner", compact(
+        "title", 
+        "partner", 
+        "comments", 
+        "likes", 
+        "dislikes", 
+        'userId',
+        "partnerId"
+      )
+    ); 
   } 
-  
 }

@@ -5,111 +5,129 @@ namespace Controllers;
 use Security;
 
 class User extends Controller {
-
   protected $modelName = \Models\User::class;
 
   public function signin() {
+    $title = "Connexion";
+    $error = '';
+    $mailUsername = $_POST['mailUsername'] ?? '';
 
     if(isset($_POST['login-submit'])) {
-
       if(!empty($_POST['mailUsername']) && !empty($_POST['pwd'])) {
-
         $userLogin = $this->model->login(Security::checkInput($_POST['mailUsername']));
 
         if(!$userLogin) {
-          \Location::redirect("index.php?controller=user&task=signin&err=No user exists");
-          exit;
+          $error = 'No user exists';
         } elseif(!password_verify(Security::checkInput($_POST['pwd']), $userLogin['pass'])) {
-          \Location::redirect("index.php?controller=user&task=signin&err=Password incorrect");
+          $error = 'Incorrect password';
         } else {
-        
           $_SESSION['access'] = "User";
           $_SESSION['userId'] = $userLogin['id'];
           $_SESSION['lastname'] = $userLogin['lastname'];
           $_SESSION['firstname'] = $userLogin['firstname'];
           
-          \Location::redirect("index.php?controller=partner&task=getAllPartners");
+          \Location::redirect(URL . "partner/getAllPartners");
         }
-        
       } else {
-        \Location::redirect("index.php?err=Fields required");
+        $error = 'Fields required';
       }
     }
 
-    $title = "Connexion";
-    \Vue::render("user/login", compact('title'));
-    
+    \Vue::render("user/login", compact(
+        'title',
+        'error',
+        'mailUsername'
+      )
+    );
   }
 
   public function signup() {
+    $title = "Signup";
+
+    $error = '';
+    $success = '';
+    $firstname = $_POST['firstname'] ?? '';
+    $lastname = $_POST['lastname'] ?? '';
+    $username = $_POST['username'] ?? '';
+    $email = $_POST['email'] ?? '';
+    $pwd = $_POST['pwd'] ?? '';
+    $pwdRepeat = $_POST['pwd-repeat'] ?? '';
+    $secretQuestion = $_POST['secretQuestion'] ?? '';
+    $secretResponse = $_POST['secretResponse'] ?? '';
 
     if(isset($_POST['signup-submit'])) {
-  
       if(
-        !empty($_POST['lastname']) && 
-        !empty($_POST['firstname']) &&
-        !empty($_POST['username']) &&
-        !empty($_POST['email']) &&
-        !empty($_POST['pwd']) &&
-        !empty($_POST['pwd-repeat']) &&
-        !empty($_POST['secretQuestion']) &&
-        !empty($_POST['secretResponse'])
+        !empty($firstname) &&
+        !empty($lastname) && 
+        !empty($username) &&
+        !empty($email) &&
+        !empty($pwd) &&
+        !empty($pwdRepeat) &&
+        !empty($secretQuestion) &&
+        !empty($secretResponse)
       ) {
-    
-        if($_POST['pwd'] !== $_POST['pwd-repeat']) {
-          \Location::redirect("index.php?controller=user&task=signup&err=Password must be the same");
+        if(Security::checkInput($pwd) !== Security::checkInput($pwdRepeat)) {
+          $error = 'Password must be the same';
         } else {
-          
-          $lastName = Security::checkInput($_POST['lastname']);
-          $firstname = Security::checkInput($_POST['firstname']);
-          $username = Security::checkInput($_POST['username']);
-          $email = Security::checkInput($_POST['email']);
-          $pwd = Security::checkInput($_POST['pwd']);
-          $pwdRepeat = Security::checkInput($_POST['pwd-repeat']);
-          $secretQuestion = Security::checkInput($_POST['secretQuestion']);
-          $secretResponse = Security::checkInput($_POST['secretResponse']);
+          $hash = password_hash(Security::checkInput($pwd), PASSWORD_DEFAULT);
     
-          $hash = password_hash($pwd, PASSWORD_DEFAULT);
-    
-          $userNameExists = $this->model->findUserName($username);
-          $userExists = $this->model->login($email);
+          $userNameExists = $this->model->findUserName(Security::checkInput($username));
+          $userExists = $this->model->login(Security::checkInput($email));
     
           if($userNameExists) {
-            \Location::redirect("index.php?controller=user&task=signup&err=Username already exists");
+            $error = 'Username already exists';
           } elseif($userExists) {
-            \Location::redirect("index.php?controller=user&task=signup&err=Email already exists");
-          } else {
-            $this->model->save($lastName, $firstname, $username, $email, $hash, $secretQuestion, $secretResponse);
-            \Location::redirect("index.php?controller=user&task=signup&success=Account successfully created");
+            $error = 'Email already exists';
+          } else {            
+            $this->model->save(
+              Security::checkInput($lastname), 
+              Security::checkInput($firstname), 
+              Security::checkInput($username), 
+              Security::checkInput($email), 
+              $hash, 
+              Security::checkInput($secretQuestion), 
+              Security::checkInput($secretResponse)
+            );
+
+            $success = 'Account successfully created';
+
+            $firstname = '';
+            $lastname = '';
+            $username = '';
+            $email = '';
+            $secretResponse = '';
           }
-    
         }
-        
       } else {
-        \Location::redirect("index.php?controller=user&task=signup&err=Fields required");
+        $error = 'Fields required';
       }
-    
     } 
     
-    $title = "Signup";
-    \Vue::render("user/signup", compact("title"));
-
+    \Vue::render("user/signup", compact(
+        "title",
+        'error',
+        'success',
+        'firstname',
+        'lastname',
+        'username',
+        'email',
+        'secretResponse'
+      )
+    );
   }
 
   public function forgotPassword() {
+    $title = "Forgot password";
+    $error = '';
+    $success = '';
 
     if(isset($_POST['forgot-pass-submit'])) {
-  
       if(!empty($_POST['email'])) {
-    
         $userLogin = $this->model->login(Security::checkInput($_POST['email']));
     
         if(!$userLogin) {
-          \Location::redirect("index.php?controller=user&task=forgotPassword&err=No user exists");
-        } else {
-    
-          // session_start();
-    
+          $error = 'No user exists';
+        } else {    
           $userEmail = $userLogin['email'];
     
           $token = random_bytes(32);
@@ -118,79 +136,92 @@ class User extends Controller {
           $_SESSION['userEmail'] = $userEmail;
           $_SESSION['authorize'] = "Authorize";
 
-          $urlLocalHost = "http://localhost/gbaf/index.php?controller=user&task=resetPassword&validator=" . $hashedToken;
+          $urlLocalHost = URL . "user/resetPassword/bearer/".$hashedToken;
     
           $to = $userEmail;
           $subject = 'Reset your password for GBAF';
     
-          $message = '<p>We recieved a password request. The link to reset your password make this request is below, if you did not make this request, you can ignore this email</p>';
-          $message .= '<p>Here is your password reset link: </br>';
-          $message .= '<a href="' . $urlLocalHost . '">' . $urlLocalHost . '</a></p>';
-    
           $header = "From: GBAF <adidbk91@gmail.com>\r\n";
           $header .= "Reply-To: adidbk91@gmail.com\r\n";
           $header .= "Content-type: text/html\r\n";
+
+          $message = "We recieved a password request.\n";
+          $message .= "If you did not make this request, you can ignore this email.\n";
+          $message .= "The link to reset your password make this request is below.\n";
+          $message .= "Here is your password reset link: \n";
+          $message .= $urlLocalHost;
     
           mail($to, $subject, $message, $header);
           
-          \Location::redirect("index.php?controller=user&task=forgotPassword&success=Verify in your email, we sent you a link");
+          $success = 'Verify in your email, we sent you a link';
         }
-        
       } else {
-        \Location::redirect("index.php?controller=user&task=forgotPassword&err=Field required");
+        $error = 'Field required';
       }
     }
 
-    $title = "Forgot password";
-    \Vue::render("user/forgot", compact("title"));
-
+    \Vue::render("user/forgot", compact(
+        "title",
+        'error',
+        'success'
+      )
+    );
   }
 
-  public function resetPassword() {
+  public function resetPassword($param) {
     \Auth::authentification();
 
+    $title = "Reset password";
+    $error = '';
+    $success = '';
+    $bearer = $param ?? '';
+    
     if (isset($_POST['reset-pass-submit'])) {
-
-      $validator = Security::checkInput($_POST['validator']);
+      $bearer = Security::checkInput($_POST['bearer']);
       $password = Security::checkInput($_POST['pwd']);
       $passwordRepeat = Security::checkInput($_POST['pwd-repeat']);
-    
-      if (empty($password) || empty($passwordRepeat)) {
-        \Location::redirect("index.php?controller=user&task=resetPassword&err=Fields required&validator=".$validator);
-      } else if ($password != $passwordRepeat) {
-        \Location::redirect("index.php?controller=user&task=resetPassword&err=Password must be the same&validator=".$validator);
-      } else {
-    
-        if($validator !== $_SESSION['token']) {
-          \Location::redirect("index.php?controller=user&task=resetPassword&err=You need to make a new request");
-        } else {
       
+      if (empty($password) || empty($passwordRepeat)) {
+        $error = 'Fields required';
+        
+        // \Location::redirect(URL . 'user/resetPassword/bearer/' . $bearer);
+      } else if ($password != $passwordRepeat) {
+        $error = 'Password must be the same';
+      } else {
+        if($bearer !== $_SESSION['token']) {
+          $error = 'You need to make a new request';
+        } else {
           $emailFromUser = $_SESSION['userEmail'];
           $userLogin = $this->model->login($emailFromUser);
       
           if(!$userLogin) {
-            \Location::redirect("index.php?controller=user&task=resetPassword&err=You need to make a new request");
+            $error = 'You need to make a new request';
           } else {
             $newPwdHash = password_hash($password, PASSWORD_DEFAULT);
             $this->model->updateUserPassword($newPwdHash, $emailFromUser);
-            \Location::redirect("index.php?controller=user&task=resetPassword&success=Your new password has been reset");
+
+            $success = 'Your new password has been reset';
           }
         }
       }
     } 
 
-    $title = "Reset password";
-    \Vue::render("user/reset", compact("title"));
+    var_dump('BEARER', $bearer);
 
+    \Vue::render("user/reset", compact(
+        "title",
+        'error',
+        'success',
+        'bearer'
+      )
+    );
   }
 
   public function logoutUser() {
-
     session_start();
     session_unset();
     session_destroy();
 
-    \Location::redirect("index.php");
+    \Location::redirect(URL . "user/signin");
   }
-
 }

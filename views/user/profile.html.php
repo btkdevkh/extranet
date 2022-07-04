@@ -4,8 +4,8 @@
     <p class="general-p">The Groupement Banque Assurance Français (GBAF) is a federation representing the 6 major French groups :</p>
 
     <div class="general-drawing">
-        <img src="public/img/formation.png" alt="Drawing">
-        <img src="public/img/protectpeople.png" alt="Drawing">
+        <img src="<?= URL ?>public/img/formation.png" alt="Drawing">
+        <img src="<?= URL ?>public/img/protectpeople.png" alt="Drawing">
     </div>
 
     <ul class="gerneral-lists">
@@ -35,12 +35,12 @@
       <?php foreach($partners as $partner) : ?>
         <div class="article-container">
           <article>
-            <img src="public/img/<?= $partner['logo'] ?>" alt="<?= $partner['title'] ?>">
+            <img src="<?= URL ?>public/img/<?= $partner['logo'] ?>" alt="<?= $partner['title'] ?>">
             <div class="div_title_p">
               <h3 class="actor-title"><?= $partner['title'] ?></h3>
               <p class="actor-p"><?= substr($partner['content'], 0, 200) . '...' ?></p>
             </div>
-            <a class="read-more" href="index.php?controller=partner&task=getOnePartner&partnerId=<?= (int)$partner['id'] ?>">Read more</a>
+            <a class="read-more" href="<?= URL ?>partner/getOnePartner/partnerId/<?= (int)$partner['id'] ?>">Read more</a>
           </article>
         </div>
       <?php endforeach; ?>
