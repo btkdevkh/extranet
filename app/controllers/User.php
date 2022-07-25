@@ -22,6 +22,8 @@ class User extends Controller {
           $error = 'Incorrect password';
         } else {
           $_SESSION['access'] = "User";
+          $_SESSION['authorize'] = "authorize";
+          
           $_SESSION['userId'] = $userLogin['id'];
           $_SESSION['lastname'] = $userLogin['lastname'];
           $_SESSION['firstname'] = $userLogin['firstname'];
@@ -222,6 +224,6 @@ class User extends Controller {
     session_unset();
     session_destroy();
 
-    \Location::redirect(URL . "user/signin");
+    \Location::redirect(URL);
   }
 }

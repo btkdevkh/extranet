@@ -1,65 +1,31 @@
 <?php
 
-use Controllers\Comment;
-use Controllers\Partner;
-use Controllers\User;
-use Controllers\Vote;
-
 class Application {
-  public function __construct() {
-    $url = $this->getUrl();
+  public static function process() {
+    $url = self::getUrl();
     // echo "<pre>";
     // var_dump($url);
     // echo "</pre>";
 
-    $userController = new User;
-    $partnerController = new Partner;
-    $commentController = new Comment;
-    $voteController = new Vote;
+    $controllerName = "User";
+    $task = "signin";
 
-    try {
-      if(!isset($url[0]) || !isset($url[1])) {
-        $userController->signin();
-        return;
-      }
-
-      switch ($url[1]) {
-        case 'signin':
-          $userController->signin();
-          break;
-        case 'signup':
-          $userController->signup();
-          break;
-        case 'logoutUser':
-          $userController->logoutUser();
-          break;
-        case 'getAllPartners':
-          $partnerController->getAllPartners();
-          break;
-        case 'getOnePartner':
-          $partnerId = $url[3] ?? null;
-          $partnerController->getOnePartner($partnerId);
-          break;
-        case 'saveComment':
-          $commentController->saveComment();
-          break;
-        case 'thumbUp':
-          $voteController->thumbup();
-          break;
-        case 'thumbDown':
-          $voteController->thumbDown();
-          break;
-        default:
-          throw new Exception("Page n'existe pas");
-          break;
-      }
-    } catch (Exception $e) {
-      $msg = $e->getMessage();
-      echo $msg;
+    if(!empty($url[0])) {
+      $controllerName = ucfirst($url[0]);
     }
+
+    if(!empty($url[1])) {
+      $task = $url[1];
+    }
+
+    $controllerName = "\controllers\\" . $controllerName;
+
+    $controller = new $controllerName();
+
+    $controller->$task($url[2] ?? null);
   }
 
-  protected function getUrl() {
+  protected static function getUrl() {
     if(isset($_GET['page'])) {
       $url = rtrim($_GET['page'], "/");
       $url = explode("/", filter_var($url, FILTER_SANITIZE_URL));

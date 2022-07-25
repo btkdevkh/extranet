@@ -1,4 +1,4 @@
-# Extranet | GBAF Refactoring to MVC (PHP)
+# Extranet | GBAF Refactoring to OOP MVC (PHP)
 
 - Login system project
 - Projet à la base en php procédurale, refactorisé au MVC
@@ -12,6 +12,7 @@
 - Espace d'utilisateur
 - Commenter d'un contenu
 - Like ou dislike d'un contenu
+- .htaccess implementation
 
 
 ## Tester ce projet avec php

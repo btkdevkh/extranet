@@ -40,7 +40,7 @@
               <h3 class="actor-title"><?= $partner['title'] ?></h3>
               <p class="actor-p"><?= substr($partner['content'], 0, 200) . '...' ?></p>
             </div>
-            <a class="read-more" href="<?= URL ?>partner/getOnePartner/partnerId/<?= (int)$partner['id'] ?>">Read more</a>
+            <a class="read-more" href="<?= URL ?>partner/getOnePartner/<?= (int)$partner['id'] ?>">Read more</a>
           </article>
         </div>
       <?php endforeach; ?>

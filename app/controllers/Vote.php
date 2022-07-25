@@ -30,15 +30,15 @@ class Vote extends Controller {
       if($voteByUserAndPartnerId === false) {
         $this->model->saveVote($userId, $partnerId, $like, 'like_count');
 
-        \Location::redirect(URL . "partner/getOnePartner/partnerId/" . $partnerId);
+        \Location::redirect(URL . "partner/getOnePartner/" . $partnerId);
       } elseif($voteByUserAndPartnerId['dislike_count'] !== null) {
         $this->model->updateVoteByUserAndPartnerId($userId, $partnerId, $like, null);
 
-        \Location::redirect(URL . "partner/getOnePartner/partnerId/" . $partnerId);
+        \Location::redirect(URL . "partner/getOnePartner/" . $partnerId);
       } elseif(count($voteByUserAndPartnerId) > 1) {
         $this->model->deleteVoteByUserAndPartnerId($userId, $partnerId);
         
-        \Location::redirect(URL . "partner/getOnePartner/partnerId/" . $partnerId);
+        \Location::redirect(URL . "partner/getOnePartner/" . $partnerId);
       }
     } 
   }
@@ -55,15 +55,15 @@ class Vote extends Controller {
       if($voteByUserAndPartnerId === false) {
         $this->model->saveVote($userId, $partnerId, $dislike, 'dislike_count');
 
-        \Location::redirect(URL . "partner/getOnePartner/partnerId/" . $partnerId);
+        \Location::redirect(URL . "partner/getOnePartner/" . $partnerId);
       } elseif($voteByUserAndPartnerId['like_count'] !== null) {
         $this->model->updateVoteByUserAndPartnerId($userId, $partnerId, null, $dislike);
 
-        \Location::redirect(URL . "partner/getOnePartner/partnerId/" . $partnerId);
+        \Location::redirect(URL . "partner/getOnePartner/" . $partnerId);
       } else {
         $this->model->deleteVoteByUserAndPartnerId($userId, $partnerId);
 
-        \Location::redirect(URL . "partner/getOnePartner/partnerId/" . $partnerId);
+        \Location::redirect(URL . "partner/getOnePartner/" . $partnerId);
       }
     }
   }

@@ -9,7 +9,7 @@ class Auth {
 
   public static function authentification() {
     if(!isset($_SESSION['authorize']) && !isset($_SESSION['access'])) {
-      \Location::redirect("index.php");
+      \Location::redirect(URL);
     }
   }
 }
