@@ -5,7 +5,7 @@ namespace Models;
 abstract class Model {
 
   private static $user = "root";
-  private static $password = "";
+  private static $password = "123456789";
   private static $dsn = 'mysql:host=localhost;dbname=gbaf';
   private static $pdo;
 
@@ -35,5 +35,4 @@ abstract class Model {
     $stmt->closeCursor();
     return $datas;
   }
-
 }

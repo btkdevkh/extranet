@@ -1,8 +1,7 @@
 <?php
 
-define("URL", str_replace("index.php", "", (isset($_SERVER['HTTPS']) ? "https" : "http") . "://$_SERVER[HTTP_HOST]$_SERVER[PHP_SELF]"));
-
-require_once './app/Autoloader.php';
+require_once './app/config/config.php';
+require_once APPROOT . '/Autoloader.php';
 
 Autoloader::loadClass();
-Application::process();
+new Application;
