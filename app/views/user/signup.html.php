@@ -44,7 +44,7 @@
     <p class="errors"><?= isset($error) ? $error : null ?></p>
     <p class="success">
       <?= isset($success) ? $success : null ?>
-      <a class='succ' href='<?= URL . 'user/signin'?>'>Go to Login</a>
+      <a class='succ' href='<?= URL . 'user/signin'?>'>Account activated ? -> Login</a>
     </p>
   </div>
 </section>

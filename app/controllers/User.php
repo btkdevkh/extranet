@@ -20,6 +20,15 @@ class User extends Controller {
           $error = 'No user exists';
         } elseif(!password_verify(Security::checkInput($_POST['pwd']), $userLogin['pass'])) {
           $error = 'Incorrect password';
+        } elseif($userLogin['is_activated'] === 0) {
+          $bytes = random_bytes(30);
+          $token_validate = bin2hex($bytes);
+          $_SESSION['token_validate'] = $token_validate;
+          $_SESSION['userEmail'] = Security::checkInput($userLogin['email']);
+          $_SESSION['authorize'] = "Authorize";
+
+          $url = URL . "user/validateAccount/bearer/".$token_validate;
+          $error = "Account inactivated ! <a style='color: blue;text-decoration: underline;' href=".$url.">Activate now</a>";
         } else {
           $_SESSION['access'] = "User";
           $_SESSION['authorize'] = "authorize";
@@ -91,7 +100,28 @@ class User extends Controller {
               Security::checkInput($secretResponse)
             );
 
-            $success = 'Account successfully created';
+            $bytes = random_bytes(30);
+            $token_validate = bin2hex($bytes);
+            $_SESSION['token_validate'] = $token_validate;
+            $_SESSION['userEmail'] = Security::checkInput($email);
+            $_SESSION['authorize'] = "Authorize";
+
+            $url = URL . "user/validateAccount/bearer/".$token_validate;
+      
+            $to = Security::checkInput($email);
+            $subject = 'Ativated Account for GBAF';
+      
+            $header = "From: GBAF <adidbk91@gmail.com>\r\n";
+            $header .= "Reply-To: adidbk91@gmail.com\r\n";
+            $header .= "Content-type: text/html\r\n";
+
+            $message = "You are now member.\n";
+            $message .= "Please validate this link to activate your account.\n";
+            $message .= $url;
+      
+            mail($to, $subject, $message, $header);
+
+            $success = 'Account successfully created. We sent you a link to your email';
 
             $firstname = '';
             $lastname = '';
@@ -114,6 +144,32 @@ class User extends Controller {
         'username',
         'email',
         'secretResponse'
+      )
+    );
+  }
+
+  public function validateAccount() {
+    $title = "Activation";
+    $error = "";
+    $success = "";
+    $bearer = Security::checkInput(explode('/', $_GET['page'])[3]);
+    
+    if (isset($bearer) && isset($_SESSION['token_validate'])) {
+      if($bearer !== $_SESSION['token_validate']) {
+        $error = 'You need to make a new request';
+      } else {
+        $this->model->validateUserAccount($_SESSION['userEmail']);
+        $success = "Account Activated";
+        unset($_SESSION['token_validate']);
+        unset($_SESSION['userEmail']);
+        unset($_SESSION['authorize']);
+      }
+    } 
+
+    \Vue::render("user/validate_account", compact(
+        "title",
+        'error',
+        'success',
       )
     );
   }

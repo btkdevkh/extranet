@@ -3,7 +3,6 @@
 namespace Models;
 
 class User extends Model {
-
   public function login($email) {    
     $req = 'SELECT * FROM gbaf_user WHERE username = :username OR email = :email';
     $stmt = $this->getDb()->prepare($req);
@@ -49,5 +48,13 @@ class User extends Model {
     $stmt->execute();
     $stmt->closeCursor();
   }
-  
+
+  public function validateUserAccount ($email) {
+    $req = 'UPDATE gbaf_user SET is_activated = :is_activated WHERE email = :email';
+    $stmt = $this->getDb()->prepare($req);
+    $stmt->bindValue(':is_activated', 1, \PDO::PARAM_INT);
+    $stmt->bindValue(':email', $email, \PDO::PARAM_STR);
+    $stmt->execute();
+    $stmt->closeCursor();
+  }
 }

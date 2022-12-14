@@ -5,8 +5,8 @@ namespace Models;
 abstract class Model {
 
   private static $user = "root";
-  private static $password = "123456789";
-  private static $dsn = 'mysql:host=localhost;dbname=gbaf';
+  private static $password = "";
+  private static $dsn = 'mysql:host=localhost;dbname=gbaf_db';
   private static $pdo;
 
   protected $table;
